@@ -59,18 +59,12 @@ jest.mock('../../services/dbService', () => ({
 }));
 
 describe('Conversion Routes', () => {
-  beforeAll(async () => {
-    // No need to connect to a real database
-    // The mongoose.connect is already mocked
-  });
-
   afterAll(async () => {
     // Using the mocked close function
     await mongoose.connection.close();
   });
 
   beforeEach(async () => {
-    // Mock the Conversion.deleteMany instead of actually calling it
     jest.spyOn(Conversion, 'deleteMany').mockResolvedValue({ deletedCount: 0 } as any);
   });
 
