@@ -1,6 +1,14 @@
 import Conversion from '../../models/Conversion';
 import * as dbService from '../dbService';
 
+// Mock the logger
+jest.mock('../../middlewares/logging/logger', () => ({
+  error: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
+
 jest.mock('../../models/Conversion');
 
 const mockedConversion = Conversion as jest.Mocked<typeof Conversion>;
@@ -17,10 +25,12 @@ const mockedConversion = Conversion as jest.Mocked<typeof Conversion>;
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterAll(() => {
   (console.error as jest.Mock).mockRestore();
+  (console.log as jest.Mock).mockRestore();
 });
 
 describe('dbService', () => {

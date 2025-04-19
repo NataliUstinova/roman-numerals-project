@@ -59,7 +59,7 @@ A full-stack application that converts between Roman numerals and Arabic numbers
   
     ##### For Windows (PowerShell)
     ```PowerShell
-    New-Item -Path .env -Value "PORT=8080\nMONGODB_URI=mongodb://localhost:27017/roman-numerals-db\nNODE_ENV=development\nLOG_LEVEL=info\nALLOWED_ORIGINS=http://localhost:3000" -Force
+    New-Item -Path .env -Value "PORT=8080`nMONGODB_URI=mongodb://localhost:27017/roman-numerals-db`nNODE_ENV=development`nLOG_LEVEL=info`nALLOWED_ORIGINS=http://localhost:3000" -Force
     ```
 4. Start the backend server:
    ```bash
