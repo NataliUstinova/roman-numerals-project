@@ -47,10 +47,20 @@ A full-stack application that converts between Roman numerals and Arabic numbers
    ```
 
 3. Create a .env file in the backend directory with the following variables:
+    #### For Linux/Mac
    ```bash
-   touch .env && echo -e "PORT=8080\nMONGODB_URI=mongodb://localhost:27017/roman-numerals-db" > .env
+   # For Linux/Mac
+   echo "PORT=8080
+   MONGODB_URI=mongodb://localhost:27017/roman-numerals-db
+   NODE_ENV=development
+   LOG_LEVEL=info
+   ALLOWED_ORIGINS=http://localhost:3000 > .env
    ```
-
+  
+    ##### For Windows (PowerShell)
+    ```PowerShell
+    New-Item -Path .env -Value "PORT=8080`nMONGODB_URI=mongodb://localhost:27017/roman-numerals-db`nNODE_ENV=development`nLOG_LEVEL=infonALLOWED_ORIGINS=http://localhost:3000" -Force
+    ```
 4. Start the backend server:
    ```bash
    npm start
