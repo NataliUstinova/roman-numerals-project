@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { errorHandler } from '../errorHandler';
-import logger from '../logger';
+import logger from '../../logging/logger';
 
 // Mock the logger
-jest.mock('../logger', () => ({
+jest.mock('../../logging/logger', () => ({
   error: jest.fn()
 }));
 

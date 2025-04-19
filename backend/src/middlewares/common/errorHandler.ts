@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from './logger';
+import logger from '../logging/logger';
 
 interface ErrorWithStatus extends Error {
   status?: number;

@@ -1,10 +1,10 @@
 import { Express } from 'express';
 import express from 'express';
-import { setupCors } from './cors';
-import { setupHelmet } from './helmet';
-import { setupRateLimiter } from './rateLimiter';
-import { errorHandler } from './errorHandler';
-import { requestLogger } from './requestLogger';
+import { setupCors } from './security/cors';
+import { setupHelmet } from './security/helmet';
+import { setupRateLimiter } from './security/rateLimiter';
+import { errorHandler } from './common/errorHandler';
+import { requestLogger } from './logging/requestLogger';
 
 export const setupMiddlewares = (app: Express): void => {
   // Security middlewares
@@ -22,4 +22,4 @@ export const setupMiddlewares = (app: Express): void => {
   app.use(errorHandler);
 };
 
-export { default as logger } from './logger';
+export { default as logger } from './logging/logger';
