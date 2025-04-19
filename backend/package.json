@@ -24,7 +24,8 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "mongoose": "^7.5.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
