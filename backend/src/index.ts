@@ -16,14 +16,25 @@ const PORT = process.env.PORT || 8080;
 setupMiddlewares(app);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI as string)
-  .then(() => {
-    logger.info('Connected to MongoDB');
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/roman-numerals-db';
+mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000,
   })
+.then(() => {
+  logger.info('Connected to MongoDB');
+})
   .catch((error) => {
     logger.error('MongoDB connection error:', error);
+    // Exit the process with failure code since MongoDB connection is critical
+    process.exit(1);
   });
 
+  // Handle graceful shutdown
+process.on('SIGINT', async () => {
+    await mongoose.connection.close();
+    logger.info('MongoDB connection closed through app termination');
+    process.exit(0);
+  });
 // Routes
 app.use('/', conversionRoutes);
 
