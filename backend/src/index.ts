@@ -33,8 +33,17 @@ app.get('/health', (_req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-  logger.info(`Server is running on port ${PORT}`);
-});
+const server = app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+  });
+
+server.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use`);
+      } else {
+        logger.error('Server error:', error);
+      }
+    process.exit(1);
+  });
 
 export default app;
