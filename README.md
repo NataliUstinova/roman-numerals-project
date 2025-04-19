@@ -36,7 +36,7 @@ A full-stack application that converts between Roman numerals and Arabic numbers
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/roman-numerals-project.git
+   git clone https://github.com/NataliUstinova/roman-numerals-project.git
    cd roman-numerals-project
    ```
 
@@ -48,7 +48,7 @@ A full-stack application that converts between Roman numerals and Arabic numbers
 
 3. Create a .env file in the backend directory with the following variables:
    ```bash
-   touch .env && echo -e "PORT=5000\nMONGODB_URI=mongodb://localhost:27017/roman-numerals" > .env
+   touch .env && echo -e "PORT=8080\nMONGODB_URI=mongodb://localhost:27017/roman-numerals-db" > .env
    ```
 
 4. Start the backend server:
