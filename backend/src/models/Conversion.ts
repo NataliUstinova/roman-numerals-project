@@ -10,12 +10,12 @@ export interface IConversion extends Document {
 const ConversionSchema: Schema = new Schema({
   inputValue: { type: String, required: true },
   convertedValue: { type: Schema.Types.Mixed, required: true },
-  type: { 
-    type: String, 
-    required: true, 
-    enum: ['roman-to-arabic', 'arabic-to-roman'] 
+  type: {
+    type: String,
+    required: true,
+    enum: ['roman-to-arabic', 'arabic-to-roman'],
   },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Create a compound index for caching purposes

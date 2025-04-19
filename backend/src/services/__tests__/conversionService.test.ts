@@ -1,4 +1,9 @@
-import { arabicToRoman, romanToArabic, isValidNumber, isValidRoman } from '../conversionService';
+import {
+  arabicToRoman,
+  romanToArabic,
+  isValidNumber,
+  isValidRoman,
+} from '../conversionService';
 
 describe('Conversion Service', () => {
   describe('arabicToRoman', () => {

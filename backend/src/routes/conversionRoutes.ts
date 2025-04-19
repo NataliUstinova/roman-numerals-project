@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { convertToRoman, convertToArabic, getAll, removeAll } from '../controllers/conversionController';
+
+import {
+  convertToRoman,
+  convertToArabic,
+  getAll,
+  removeAll,
+} from '../controllers/conversionController';
 
 const router = Router();
 

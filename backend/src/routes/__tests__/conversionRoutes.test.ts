@@ -1,5 +1,6 @@
-import request from 'supertest';
 import mongoose from 'mongoose';
+import request from 'supertest';
+
 import app from '../../index';
 import Conversion from '../../models/Conversion';
 
@@ -17,45 +18,49 @@ jest.mock('mongoose', () => {
 
 // Mock the database service
 jest.mock('../../services/dbService', () => ({
-  getCachedConversion: jest.fn().mockImplementation(async (inputValue, type) => {
-    if (inputValue === '42' && type === 'arabic-to-roman') {
+  getCachedConversion: jest
+    .fn()
+    .mockImplementation(async (inputValue, type) => {
+      if (inputValue === '42' && type === 'arabic-to-roman') {
+        return {
+          inputValue: '42',
+          convertedValue: 'XLII',
+          type: 'arabic-to-roman',
+        };
+      }
+      if (inputValue === 'XLII' && type === 'roman-to-arabic') {
+        return {
+          inputValue: 'XLII',
+          convertedValue: 42,
+          type: 'roman-to-arabic',
+        };
+      }
+      return null;
+    }),
+  saveConversion: jest
+    .fn()
+    .mockImplementation(async (inputValue, convertedValue, type) => {
       return {
-        inputValue: '42',
-        convertedValue: 'XLII',
-        type: 'arabic-to-roman'
+        inputValue,
+        convertedValue,
+        type,
       };
-    }
-    if (inputValue === 'XLII' && type === 'roman-to-arabic') {
-      return {
-        inputValue: 'XLII',
-        convertedValue: 42,
-        type: 'roman-to-arabic'
-      };
-    }
-    return null;
-  }),
-  saveConversion: jest.fn().mockImplementation(async (inputValue, convertedValue, type) => {
-    return {
-      inputValue,
-      convertedValue,
-      type
-    };
-  }),
+    }),
   getAllConversions: jest.fn().mockResolvedValue([
     {
       inputValue: '42',
       convertedValue: 'XLII',
       type: 'arabic-to-roman',
-      createdAt: new Date()
+      createdAt: new Date(),
     },
     {
       inputValue: 'XLII',
       convertedValue: 42,
       type: 'roman-to-arabic',
-      createdAt: new Date()
-    }
+      createdAt: new Date(),
+    },
   ]),
-  removeAllConversions: jest.fn().mockResolvedValue(2)
+  removeAllConversions: jest.fn().mockResolvedValue(2),
 }));
 
 describe('Conversion Routes', () => {
@@ -65,7 +70,9 @@ describe('Conversion Routes', () => {
   });
 
   beforeEach(async () => {
-    jest.spyOn(Conversion, 'deleteMany').mockResolvedValue({ deletedCount: 0 } as any);
+    jest
+      .spyOn(Conversion, 'deleteMany')
+      .mockResolvedValue({ deletedCount: 0 } as any);
   });
 
   describe('GET /roman/:inputValue', () => {
@@ -75,7 +82,7 @@ describe('Conversion Routes', () => {
       expect(response.body).toEqual({
         inputValue: 10,
         convertedValue: 'X',
-        cached: false
+        cached: false,
       });
     });
 
@@ -85,7 +92,7 @@ describe('Conversion Routes', () => {
       expect(response.body).toEqual({
         inputValue: 42,
         convertedValue: 'XLII',
-        cached: true
+        cached: true,
       });
     });
 
@@ -102,7 +109,7 @@ describe('Conversion Routes', () => {
       expect(response.body).toEqual({
         inputValue: 'X',
         convertedValue: 10,
-        cached: false
+        cached: false,
       });
     });
 
@@ -112,7 +119,7 @@ describe('Conversion Routes', () => {
       expect(response.body).toEqual({
         inputValue: 'XLII',
         convertedValue: 42,
-        cached: true
+        cached: true,
       });
     });
 
@@ -136,7 +143,7 @@ describe('Conversion Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         success: true,
-        message: 'Successfully deleted 2 records'
+        message: 'Successfully deleted 2 records',
       });
     });
   });

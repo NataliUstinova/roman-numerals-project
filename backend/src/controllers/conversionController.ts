@@ -1,27 +1,43 @@
 import { Request, Response } from 'express';
-import { arabicToRoman, romanToArabic, isValidNumber, isValidRoman } from '../services/conversionService';
-import { getCachedConversion, saveConversion, getAllConversions, removeAllConversions } from '../services/dbService';
+
+import {
+  arabicToRoman,
+  romanToArabic,
+  isValidNumber,
+  isValidRoman,
+} from '../services/conversionService';
+import {
+  getCachedConversion,
+  saveConversion,
+  getAllConversions,
+  removeAllConversions,
+} from '../services/dbService';
 
 // Controller for converting Arabic to Roman
-export const convertToRoman = async (req: Request, res: Response): Promise<void> => {
+export const convertToRoman = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { inputValue } = req.params;
-    
+
     // Validate input
     if (!isValidNumber(inputValue)) {
-      res.status(400).json({ error: 'Input must be a number between 1 and 3999' });
+      res
+        .status(400)
+        .json({ error: 'Input must be a number between 1 and 3999' });
       return;
     }
 
     const numericValue = Number(inputValue);
-    
+
     // Check cache first
     const cached = await getCachedConversion(inputValue, 'arabic-to-roman');
     if (cached) {
-      res.json({ 
-        inputValue: numericValue, 
+      res.json({
+        inputValue: numericValue,
         convertedValue: cached.convertedValue,
-        cached: true
+        cached: true,
       });
       return;
     }
@@ -29,11 +45,11 @@ export const convertToRoman = async (req: Request, res: Response): Promise<void>
     // Convert and save
     const romanValue = arabicToRoman(numericValue);
     await saveConversion(inputValue, romanValue, 'arabic-to-roman');
-    
-    res.json({ 
-      inputValue: numericValue, 
+
+    res.json({
+      inputValue: numericValue,
       convertedValue: romanValue,
-      cached: false
+      cached: false,
     });
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
@@ -41,10 +57,13 @@ export const convertToRoman = async (req: Request, res: Response): Promise<void>
 };
 
 // Controller for converting Roman to Arabic
-export const convertToArabic = async (req: Request, res: Response): Promise<void> => {
+export const convertToArabic = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { inputValue } = req.params;
-    
+
     // Validate input
     if (!isValidRoman(inputValue)) {
       res.status(400).json({ error: 'Invalid Roman numeral' });
@@ -52,24 +71,31 @@ export const convertToArabic = async (req: Request, res: Response): Promise<void
     }
 
     // Check cache first
-    const cached = await getCachedConversion(inputValue.toUpperCase(), 'roman-to-arabic');
+    const cached = await getCachedConversion(
+      inputValue.toUpperCase(),
+      'roman-to-arabic',
+    );
     if (cached) {
-      res.json({ 
-        inputValue: inputValue.toUpperCase(), 
+      res.json({
+        inputValue: inputValue.toUpperCase(),
         convertedValue: cached.convertedValue,
-        cached: true
+        cached: true,
       });
       return;
     }
 
     // Convert and save
     const arabicValue = romanToArabic(inputValue);
-    await saveConversion(inputValue.toUpperCase(), arabicValue, 'roman-to-arabic');
-    
-    res.json({ 
-      inputValue: inputValue.toUpperCase(), 
+    await saveConversion(
+      inputValue.toUpperCase(),
+      arabicValue,
+      'roman-to-arabic',
+    );
+
+    res.json({
+      inputValue: inputValue.toUpperCase(),
       convertedValue: arabicValue,
-      cached: false
+      cached: false,
     });
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
@@ -87,17 +113,20 @@ export const getAll = async (_req: Request, res: Response): Promise<void> => {
 };
 
 // Controller for removing all conversions
-export const removeAll = async (_req: Request, res: Response): Promise<void> => {
+export const removeAll = async (
+  _req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const deletedCount = await removeAllConversions();
-    res.json({ 
-      success: true, 
-      message: `Successfully deleted ${deletedCount} records` 
+    res.json({
+      success: true,
+      message: `Successfully deleted ${deletedCount} records`,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: (error as Error).message 
+    res.status(500).json({
+      success: false,
+      error: (error as Error).message,
     });
   }
 };
