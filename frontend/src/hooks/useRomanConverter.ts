@@ -12,14 +12,22 @@ export function useRomanConverter() {
   const [mode, setMode] = useState<'toRoman' | 'toNumber'>('toRoman');
   const [loading, setLoading] = useState(false);
 
-  const makeConversionRequest = async (endpoint: string, value: string): Promise<ConversionResponse | null> => {
+  const makeConversionRequest = async (
+    endpoint: string,
+    value: string,
+  ): Promise<ConversionResponse | null> => {
     try {
       setLoading(true);
       const response = await fetch(`/${endpoint}/${value}`);
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.error || `Failed to convert ${endpoint === 'roman' ? 'number' : 'Roman numeral'}`);
+        setError(
+          errorData.error ||
+            `Failed to convert ${
+              endpoint === 'roman' ? 'number' : 'Roman numeral'
+            }`,
+        );
         return null;
       }
 
@@ -35,14 +43,14 @@ export function useRomanConverter() {
 
   const convert = async (value: string): Promise<boolean> => {
     setError('');
-    
+
     if (mode === 'toRoman') {
       const num = parseInt(value);
       if (isNaN(num)) {
         setError('Please enter a valid number');
         return false;
       }
-      
+
       const responseData = await makeConversionRequest('roman', num.toString());
       if (responseData) {
         setRoman(responseData.convertedValue);
@@ -56,7 +64,7 @@ export function useRomanConverter() {
         return true;
       }
     }
-    
+
     return false;
   };
 
@@ -86,15 +94,15 @@ export function useRomanConverter() {
   };
 
   return {
-    roman, 
-    number, 
-    error, 
-    mode, 
+    roman,
+    number,
+    error,
+    mode,
     loading,
     setRoman,
     setNumber,
     convert,
     switchMode,
-    getValidationRules
+    getValidationRules,
   };
 }

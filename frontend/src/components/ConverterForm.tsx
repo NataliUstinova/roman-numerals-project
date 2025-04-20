@@ -18,6 +18,7 @@ const ConverterForm: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ConversionFormData>({
     defaultValues: {
       value: '',
@@ -48,6 +49,7 @@ const ConverterForm: React.FC = () => {
   };
 
   const handleSwitchMode = () => {
+    reset({ value: '' });
     switchMode();
   };
 
@@ -92,7 +94,7 @@ const ConverterForm: React.FC = () => {
 
       <div className="flex gap-4">
         <Button onClick={handleSubmit(onSubmit)} isLoading={loading} fullWidth>
-          {loading ? 'Converting...' : 'Convert'}
+          Convert
         </Button>
         <Button
           onClick={handleSwitchMode}
