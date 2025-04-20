@@ -28,6 +28,7 @@ function App() {
         const num = parseInt(number);
         if (isNaN(num)) {
           setError('Please enter a valid number');
+          setLoading(false);
           return;
         }
 
@@ -36,14 +37,22 @@ function App() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to convert number');
+          setError(errorData.error || 'Failed to convert number');
+          setLoading(false);
+          return;
         }
 
         const data = await response.json();
         setRoman(data.convertedValue);
+
+        // Update history if it's currently being shown
+        if (showHistory) {
+          fetchAllConversions();
+        }
       } else {
         if (!roman.trim()) {
           setError('Please enter a Roman numeral');
+          setLoading(false);
           return;
         }
 
@@ -52,16 +61,73 @@ function App() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to convert Roman numeral');
+          setError(errorData.error || 'Failed to convert Roman numeral');
+          setLoading(false);
+          return;
         }
 
         const data = await response.json();
-        // Update to use convertedValue instead of result
         setNumber(data.convertedValue.toString());
+
+        // Update history if it's currently being shown
+        if (showHistory) {
+          fetchAllConversions();
+        }
       }
     } catch (err) {
       console.error('Conversion error:', err);
       setError(err instanceof Error ? err.message : 'Conversion failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Similar changes for fetchAllConversions
+  const fetchAllConversions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/all');
+
+      if (!response.ok) {
+        setError('Failed to fetch conversions');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+      setConversions(data);
+
+      // Only set showHistory to true if it's not already true
+      if (!showHistory) {
+        setShowHistory(true);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load conversion history');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // And for removeAllConversions
+  const removeAllConversions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/remove', {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        setError('Failed to remove conversions');
+        setLoading(false);
+        return;
+      }
+
+      setConversions([]);
+      setError('');
+    } catch (err) {
+      console.error('Remove error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to clear conversion history');
     } finally {
       setLoading(false);
     }
@@ -72,55 +138,6 @@ function App() {
     setNumber('');
     setRoman('');
     setError('');
-  };
-
-  const fetchAllConversions = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/all');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch conversions');
-      }
-
-      const data = await response.json();
-      setConversions(data);
-      setShowHistory(true);
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to load conversion history',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeAllConversions = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/remove', {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to remove conversions');
-      }
-
-      setConversions([]);
-      setError('');
-    } catch (err) {
-      console.error('Remove error:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to clear conversion history',
-      );
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -151,13 +168,13 @@ function App() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Roman Numeral
                 </label>
-                <input
-                  type="text"
-                  value={roman}
-                  readOnly
-                  className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md"
-                  placeholder="Result will appear here..."
-                />
+                <div className="w-full px-4 py-2 min-h-[42px] flex items-center font-medium text-indigo-700">
+                  {roman || (
+                    <span className="text-gray-400">
+                      Result will appear here...
+                    </span>
+                  )}
+                </div>
               </div>
             </>
           ) : (
@@ -178,13 +195,13 @@ function App() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Number
                 </label>
-                <input
-                  type="text"
-                  value={number}
-                  readOnly
-                  className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md"
-                  placeholder="Result will appear here..."
-                />
+                <div className="w-full px-4 py-2 min-h-[42px] flex items-center font-medium text-indigo-700">
+                  {number || (
+                    <span className="text-gray-400">
+                      Result will appear here...
+                    </span>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -246,7 +263,7 @@ function App() {
               </h3>
               <div className="max-h-60 overflow-y-auto">
                 {conversions.length > 0 ? (
-                  conversions.map((conversion, index) => (
+                  conversions.map(conversion => (
                     <div
                       key={conversion._id}
                       className="p-3 border-b last:border-b-0 hover:bg-gray-50"
