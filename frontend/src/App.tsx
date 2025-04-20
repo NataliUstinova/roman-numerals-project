@@ -2,73 +2,16 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ArrowLeftRight, List, Trash2 } from 'lucide-react';
 
-interface Conversion {
-  _id: string;
-  inputValue: string;
-  convertedValue: string;
-  type: 'arabic-to-roman' | 'roman-to-arabic';
-  createdAt: string;
-  __v: number;
-}
+import FormField from './components/FormField';
+import ResultDisplay from './components/ResultDisplay';
+import ConversionHistory, { Conversion } from './components/ConversionHistory';
+import HowItWorks from './components/HowItWorks';
+import Button from './components/ui/Button.tsx';
+import Title from './components/ui/Title';
 
 interface ConversionFormData {
   value: string;
 }
-
-const FormField = ({ 
-  label, 
-  register, 
-  name, 
-  validation, 
-  error, 
-  placeholder, 
-  type = "text",
-  onChange,
-  value
-}: {
-  label: string;
-  register: any;
-  name: string;
-  validation: any;
-  error: any;
-  placeholder: string;
-  type?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  value: string;
-}) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      {label}
-    </label>
-    <input
-      type={type}
-      {...register(name, validation)}
-      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-      placeholder={placeholder}
-      onChange={onChange}
-      value={value}
-    />
-    {error && (
-      <p className="text-red-500 text-sm mt-1">{error.message}</p>
-    )}
-  </div>
-);
-
-// Result display component
-const ResultDisplay = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      {label}
-    </label>
-    <div className="w-full px-4 py-2 min-h-[42px] flex items-center font-medium text-indigo-700">
-      {value || (
-        <span className="text-gray-400">
-          Result will appear here...
-        </span>
-      )}
-    </div>
-  </div>
-);
 
 function App() {
   const [roman, setRoman] = useState('');
@@ -83,7 +26,7 @@ function App() {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<ConversionFormData>({
     defaultValues: {
       value: '',
@@ -97,7 +40,12 @@ function App() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.error || `Failed to convert ${endpoint === 'roman' ? 'number' : 'Roman numeral'}`);
+        setError(
+          errorData.error ||
+            `Failed to convert ${
+              endpoint === 'roman' ? 'number' : 'Roman numeral'
+            }`,
+        );
         return null;
       }
 
@@ -113,18 +61,18 @@ function App() {
 
   const onSubmit = async (data: ConversionFormData) => {
     setError('');
-    
+
     if (mode === 'toRoman') {
       const num = parseInt(data.value);
       if (isNaN(num)) {
         setError('Please enter a valid number');
         return;
       }
-      
+
       const responseData = await makeConversionRequest('roman', num.toString());
       if (responseData) {
         setRoman(responseData.convertedValue);
-        
+
         if (showHistory) {
           await fetchAllConversions();
         }
@@ -134,7 +82,7 @@ function App() {
       const responseData = await makeConversionRequest('arabic', romanValue);
       if (responseData) {
         setNumber(responseData.convertedValue.toString());
-        
+
         if (showHistory) {
           await fetchAllConversions();
         }
@@ -143,6 +91,12 @@ function App() {
   };
 
   const fetchAllConversions = async () => {
+    // If history is already showing, just hide it
+    if (showHistory) {
+      setShowHistory(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await fetch('/all');
@@ -154,10 +108,7 @@ function App() {
 
       const data = await response.json();
       setConversions(data);
-
-      if (!showHistory) {
-        setShowHistory(true);
-      }
+      setShowHistory(true);
     } catch (err) {
       console.error('Fetch error:', err);
       setError(
@@ -225,9 +176,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8 text-indigo-900">
-          Roman Numerals Converter
-        </h1>
+        <Title>Roman Numerals Converter</Title>
 
         <div className="space-y-6">
           {mode === 'toRoman' ? (
@@ -268,105 +217,48 @@ function App() {
           )}
 
           <div className="flex gap-4">
-            <button
+            <Button
               onClick={handleSubmit(onSubmit)}
-              disabled={loading}
-              className={`flex-1 ${
-                loading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
-              } text-white px-4 py-2 rounded-md transition-colors flex items-center justify-center`}
+              isLoading={loading}
+              fullWidth
             >
               {loading ? 'Converting...' : 'Convert'}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSwitch}
               disabled={loading}
-              className="flex items-center justify-center w-12 h-10 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              <ArrowLeftRight className="w-5 h-5 text-gray-600" />
-            </button>
+              variant="icon"
+              icon={<ArrowLeftRight className="w-5 h-5" />}
+              aria-label="Switch conversion mode"
+            />
           </div>
 
           {/* Buttons for history management */}
           <div className="flex gap-4 mt-4">
-            <button
+            <Button
               onClick={fetchAllConversions}
-              disabled={loading}
-              className={`flex-1 flex items-center justify-center gap-2 ${
-                loading ? 'bg-blue-400' : 'bg-blue-500 hover:bg-blue-600'
-              } text-white px-4 py-2 rounded-md transition-colors`}
+              isLoading={loading}
+              variant="secondary"
+              fullWidth
+              icon={<List className="w-4 h-4" />}
             >
-              <List className="w-4 h-4" />
-              View History
-            </button>
-            <button
+              {showHistory ? 'Hide History' : 'View History'}
+            </Button>
+            <Button
               onClick={removeAllConversions}
-              disabled={loading}
-              className={`flex-1 flex items-center justify-center gap-2 ${
-                loading ? 'bg-red-400' : 'bg-red-500 hover:bg-red-600'
-              } text-white px-4 py-2 rounded-md transition-colors`}
+              isLoading={loading}
+              variant="red"
+              fullWidth
+              icon={<Trash2 className="w-4 h-4" />}
             >
-              <Trash2 className="w-4 h-4" />
               Clear History
-            </button>
+            </Button>
           </div>
 
           {/* Conversion history display */}
-          {showHistory && (
-            <div className="mt-6 border rounded-md overflow-hidden">
-              <h3 className="font-medium text-gray-700 p-3 bg-gray-50 border-b">
-                Conversion History
-              </h3>
-              <div className="max-h-60 overflow-y-auto">
-                {conversions.length > 0 ? (
-                  conversions.map(conversion => (
-                    <div
-                      key={conversion._id}
-                      className="p-3 border-b last:border-b-0 hover:bg-gray-50"
-                    >
-                      <div className="flex justify-between">
-                        <span className="font-medium">
-                          {conversion.type === 'arabic-to-roman'
-                            ? 'Number → Roman'
-                            : 'Roman → Number'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(conversion.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="mt-1">
-                        <span className="text-gray-600">
-                          {conversion.inputValue}
-                        </span>
-                        <span className="mx-2">→</span>
-                        <span className="text-indigo-600 font-medium">
-                          {conversion.convertedValue}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center p-4 text-gray-500">
-                    No conversion history found
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <ConversionHistory conversions={conversions} show={showHistory} />
 
-          <div className="mt-8 text-sm text-gray-500">
-            <h2 className="font-medium text-gray-700 mb-2">How it works:</h2>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                Enter a number between 1 and 3999 to convert to Roman numerals
-              </li>
-              <li>Or switch modes to convert Roman numerals back to numbers</li>
-              <li>Click the convert button to see the result</li>
-              <li>
-                View your conversion history or clear it using the buttons 'View
-                History' and 'Clear History'
-              </li>
-            </ul>
-          </div>
+          <HowItWorks />
         </div>
       </div>
     </div>
