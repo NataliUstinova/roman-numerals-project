@@ -1,88 +1,147 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { ArrowLeftRight, List, Trash2 } from 'lucide-react';
 
 interface Conversion {
   _id: string;
   inputValue: string;
   convertedValue: string;
-  type: string;
+  type: 'arabic-to-roman' | 'roman-to-arabic';
   createdAt: string;
   __v: number;
 }
 
+interface ConversionFormData {
+  value: string;
+}
+
+const FormField = ({ 
+  label, 
+  register, 
+  name, 
+  validation, 
+  error, 
+  placeholder, 
+  type = "text",
+  onChange,
+  value
+}: {
+  label: string;
+  register: any;
+  name: string;
+  validation: any;
+  error: any;
+  placeholder: string;
+  type?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string;
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label}
+    </label>
+    <input
+      type={type}
+      {...register(name, validation)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      placeholder={placeholder}
+      onChange={onChange}
+      value={value}
+    />
+    {error && (
+      <p className="text-red-500 text-sm mt-1">{error.message}</p>
+    )}
+  </div>
+);
+
+// Result display component
+const ResultDisplay = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label}
+    </label>
+    <div className="w-full px-4 py-2 min-h-[42px] flex items-center font-medium text-indigo-700">
+      {value || (
+        <span className="text-gray-400">
+          Result will appear here...
+        </span>
+      )}
+    </div>
+  </div>
+);
+
 function App() {
-  const [number, setNumber] = useState('');
   const [roman, setRoman] = useState('');
+  const [number, setNumber] = useState('');
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'toRoman' | 'toNumber'>('toRoman');
   const [conversions, setConversions] = useState<Conversion[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleConvert = async () => {
-    setError('');
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<ConversionFormData>({
+    defaultValues: {
+      value: '',
+    },
+  });
 
+  const makeConversionRequest = async (endpoint: string, value: string) => {
     try {
-      if (mode === 'toRoman') {
-        const num = parseInt(number);
-        if (isNaN(num)) {
-          setError('Please enter a valid number');
-          setLoading(false);
-          return;
-        }
+      setLoading(true);
+      const response = await fetch(`/${endpoint}/${value}`);
 
-        // Use the server endpoint for Arabic to Roman conversion
-        const response = await fetch(`/roman/${num}`);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          setError(errorData.error || 'Failed to convert number');
-          setLoading(false);
-          return;
-        }
-
-        const data = await response.json();
-        setRoman(data.convertedValue);
-
-        // Update history if it's currently being shown
-        if (showHistory) {
-          fetchAllConversions();
-        }
-      } else {
-        if (!roman.trim()) {
-          setError('Please enter a Roman numeral');
-          setLoading(false);
-          return;
-        }
-
-        // Use the server endpoint for Roman to Arabic conversion
-        const response = await fetch(`/arabic/${roman.toUpperCase()}`);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          setError(errorData.error || 'Failed to convert Roman numeral');
-          setLoading(false);
-          return;
-        }
-
-        const data = await response.json();
-        setNumber(data.convertedValue.toString());
-
-        // Update history if it's currently being shown
-        if (showHistory) {
-          fetchAllConversions();
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || `Failed to convert ${endpoint === 'roman' ? 'number' : 'Roman numeral'}`);
+        return null;
       }
+
+      return await response.json();
     } catch (err) {
       console.error('Conversion error:', err);
       setError(err instanceof Error ? err.message : 'Conversion failed');
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
-  // Similar changes for fetchAllConversions
+  const onSubmit = async (data: ConversionFormData) => {
+    setError('');
+    
+    if (mode === 'toRoman') {
+      const num = parseInt(data.value);
+      if (isNaN(num)) {
+        setError('Please enter a valid number');
+        return;
+      }
+      
+      const responseData = await makeConversionRequest('roman', num.toString());
+      if (responseData) {
+        setRoman(responseData.convertedValue);
+        
+        if (showHistory) {
+          await fetchAllConversions();
+        }
+      }
+    } else {
+      const romanValue = data.value.toUpperCase();
+      const responseData = await makeConversionRequest('arabic', romanValue);
+      if (responseData) {
+        setNumber(responseData.convertedValue.toString());
+        
+        if (showHistory) {
+          await fetchAllConversions();
+        }
+      }
+    }
+  };
+
   const fetchAllConversions = async () => {
     try {
       setLoading(true);
@@ -90,26 +149,27 @@ function App() {
 
       if (!response.ok) {
         setError('Failed to fetch conversions');
-        setLoading(false);
         return;
       }
 
       const data = await response.json();
       setConversions(data);
 
-      // Only set showHistory to true if it's not already true
       if (!showHistory) {
         setShowHistory(true);
       }
     } catch (err) {
       console.error('Fetch error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load conversion history');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to load conversion history',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // And for removeAllConversions
   const removeAllConversions = async () => {
     try {
       setLoading(true);
@@ -119,7 +179,6 @@ function App() {
 
       if (!response.ok) {
         setError('Failed to remove conversions');
-        setLoading(false);
         return;
       }
 
@@ -127,7 +186,11 @@ function App() {
       setError('');
     } catch (err) {
       console.error('Remove error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to clear conversion history');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to clear conversion history',
+      );
     } finally {
       setLoading(false);
     }
@@ -138,6 +201,25 @@ function App() {
     setNumber('');
     setRoman('');
     setError('');
+    reset({ value: '' });
+  };
+
+  const getValidationRules = () => {
+    if (mode === 'toRoman') {
+      return {
+        required: 'Number is required',
+        min: { value: 1, message: 'Number must be at least 1' },
+        max: { value: 3999, message: 'Number must be at most 3999' },
+      };
+    } else {
+      return {
+        required: 'Roman numeral is required',
+        pattern: {
+          value: /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/i,
+          message: 'Invalid Roman numeral format',
+        },
+      };
+    }
   };
 
   return (
@@ -150,59 +232,32 @@ function App() {
         <div className="space-y-6">
           {mode === 'toRoman' ? (
             <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Enter a number (1-3999)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="3999"
-                  value={number}
-                  onChange={e => setNumber(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Enter a number..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Roman Numeral
-                </label>
-                <div className="w-full px-4 py-2 min-h-[42px] flex items-center font-medium text-indigo-700">
-                  {roman || (
-                    <span className="text-gray-400">
-                      Result will appear here...
-                    </span>
-                  )}
-                </div>
-              </div>
+              <FormField
+                label="Enter a number (1-3999)"
+                register={register}
+                name="value"
+                validation={getValidationRules()}
+                error={errors.value}
+                placeholder="Enter a number..."
+                type="number"
+                onChange={e => setNumber(e.target.value)}
+                value={number}
+              />
+              <ResultDisplay label="Roman Numeral" value={roman} />
             </>
           ) : (
             <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Enter a Roman numeral
-                </label>
-                <input
-                  type="text"
-                  value={roman}
-                  onChange={e => setRoman(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Enter a Roman numeral..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Number
-                </label>
-                <div className="w-full px-4 py-2 min-h-[42px] flex items-center font-medium text-indigo-700">
-                  {number || (
-                    <span className="text-gray-400">
-                      Result will appear here...
-                    </span>
-                  )}
-                </div>
-              </div>
+              <FormField
+                label="Enter a Roman numeral"
+                register={register}
+                name="value"
+                validation={getValidationRules()}
+                error={errors.value}
+                placeholder="Enter a Roman numeral..."
+                onChange={e => setRoman(e.target.value.toUpperCase())}
+                value={roman}
+              />
+              <ResultDisplay label="Number" value={number} />
             </>
           )}
 
@@ -214,7 +269,7 @@ function App() {
 
           <div className="flex gap-4">
             <button
-              onClick={handleConvert}
+              onClick={handleSubmit(onSubmit)}
               disabled={loading}
               className={`flex-1 ${
                 loading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
