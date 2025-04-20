@@ -1,26 +1,49 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ArrowLeftRight, List, Trash2 } from 'lucide-react';
 
 import FormField from './components/FormField';
 import ResultDisplay from './components/ResultDisplay';
-import ConversionHistory, { Conversion } from './components/ConversionHistory';
+import ConversionHistory from './components/ConversionHistory';
 import HowItWorks from './components/HowItWorks';
 import Button from './components/ui/Button.tsx';
 import Title from './components/ui/Title';
+
+import { useRomanConverter } from './hooks/useRomanConverter';
+import { useConversionHistory } from './hooks/useConversionHistory';
 
 interface ConversionFormData {
   value: string;
 }
 
 function App() {
-  const [roman, setRoman] = useState('');
-  const [number, setNumber] = useState('');
-  const [error, setError] = useState('');
-  const [mode, setMode] = useState<'toRoman' | 'toNumber'>('toRoman');
-  const [conversions, setConversions] = useState<Conversion[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const {
+    roman,
+    number,
+    error,
+    mode,
+    loading: conversionLoading,
+    setRoman,
+    setNumber,
+    convert,
+    switchMode,
+    getValidationRules,
+  } = useRomanConverter();
+
+  const {
+    conversions,
+    showHistory,
+    loading: historyLoading,
+    error: historyError,
+    fetchAll,
+    removeAll,
+    refreshHistory,
+  } = useConversionHistory();
+
+  // Combine loading states
+  const loading = conversionLoading || historyLoading;
+
+  // Combine error states
+  const combinedError = error || historyError;
 
   const {
     register,
@@ -33,144 +56,16 @@ function App() {
     },
   });
 
-  const makeConversionRequest = async (endpoint: string, value: string) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/${endpoint}/${value}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(
-          errorData.error ||
-            `Failed to convert ${
-              endpoint === 'roman' ? 'number' : 'Roman numeral'
-            }`,
-        );
-        return null;
-      }
-
-      return await response.json();
-    } catch (err) {
-      console.error('Conversion error:', err);
-      setError(err instanceof Error ? err.message : 'Conversion failed');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const onSubmit = async (data: ConversionFormData) => {
-    setError('');
-
-    if (mode === 'toRoman') {
-      const num = parseInt(data.value);
-      if (isNaN(num)) {
-        setError('Please enter a valid number');
-        return;
-      }
-
-      const responseData = await makeConversionRequest('roman', num.toString());
-      if (responseData) {
-        setRoman(responseData.convertedValue);
-
-        if (showHistory) {
-          await fetchAllConversions();
-        }
-      }
-    } else {
-      const romanValue = data.value.toUpperCase();
-      const responseData = await makeConversionRequest('arabic', romanValue);
-      if (responseData) {
-        setNumber(responseData.convertedValue.toString());
-
-        if (showHistory) {
-          await fetchAllConversions();
-        }
-      }
+    const success = await convert(data.value);
+    if (success && showHistory) {
+      await refreshHistory();
     }
   };
 
-  const fetchAllConversions = async () => {
-    // If history is already showing, just hide it
-    if (showHistory) {
-      setShowHistory(false);
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const response = await fetch('/all');
-
-      if (!response.ok) {
-        setError('Failed to fetch conversions');
-        return;
-      }
-
-      const data = await response.json();
-      setConversions(data);
-      setShowHistory(true);
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to load conversion history',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeAllConversions = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/remove', {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        setError('Failed to remove conversions');
-        return;
-      }
-
-      setConversions([]);
-      setError('');
-    } catch (err) {
-      console.error('Remove error:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to clear conversion history',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSwitch = () => {
-    setMode(mode === 'toRoman' ? 'toNumber' : 'toRoman');
-    setNumber('');
-    setRoman('');
-    setError('');
+  const handleSwitchMode = () => {
+    switchMode();
     reset({ value: '' });
-  };
-
-  const getValidationRules = () => {
-    if (mode === 'toRoman') {
-      return {
-        required: 'Number is required',
-        min: { value: 1, message: 'Number must be at least 1' },
-        max: { value: 3999, message: 'Number must be at most 3999' },
-      };
-    } else {
-      return {
-        required: 'Roman numeral is required',
-        pattern: {
-          value: /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/i,
-          message: 'Invalid Roman numeral format',
-        },
-      };
-    }
   };
 
   return (
@@ -210,9 +105,9 @@ function App() {
             </>
           )}
 
-          {error && (
+          {combinedError && (
             <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
-              {error}
+              {combinedError}
             </div>
           )}
 
@@ -225,7 +120,7 @@ function App() {
               {loading ? 'Converting...' : 'Convert'}
             </Button>
             <Button
-              onClick={handleSwitch}
+              onClick={handleSwitchMode}
               disabled={loading}
               variant="icon"
               icon={<ArrowLeftRight className="w-5 h-5" />}
@@ -236,7 +131,7 @@ function App() {
           {/* Buttons for history management */}
           <div className="flex gap-4 mt-4">
             <Button
-              onClick={fetchAllConversions}
+              onClick={fetchAll}
               isLoading={loading}
               variant="secondary"
               fullWidth
@@ -245,7 +140,7 @@ function App() {
               {showHistory ? 'Hide History' : 'View History'}
             </Button>
             <Button
-              onClick={removeAllConversions}
+              onClick={removeAll}
               isLoading={loading}
               variant="red"
               fullWidth
