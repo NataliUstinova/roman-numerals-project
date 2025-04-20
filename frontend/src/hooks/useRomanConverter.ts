@@ -93,6 +93,10 @@ export function useRomanConverter() {
     }
   };
 
+  const clearError = () => {
+    setError('');
+  };
+
   return {
     roman,
     number,
@@ -104,5 +108,6 @@ export function useRomanConverter() {
     convert,
     switchMode,
     getValidationRules,
+    clearError,
   };
 }

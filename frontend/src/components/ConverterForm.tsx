@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { ArrowLeftRight } from 'lucide-react';
 
@@ -19,6 +19,8 @@ const ConverterForm: React.FC = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    clearErrors,
+    unregister,
   } = useForm<ConversionFormData>({
     defaultValues: {
       value: '',
@@ -36,12 +38,22 @@ const ConverterForm: React.FC = () => {
     convert,
     switchMode,
     getValidationRules,
+    clearError,
   } = useRomanConverter();
 
   const { refreshHistory } = useConversionHistory();
   const showHistory = useHistoryStore(state => state.showHistory);
 
+  // Reset form when mode changes
+  useEffect(() => {
+    unregister('value');
+    reset({ value: '' });
+    clearErrors();
+  }, [mode, reset, clearErrors, unregister]);
+
   const onSubmit = async (data: ConversionFormData) => {
+    clearError();
+
     const success = await convert(data.value);
     if (success && showHistory) {
       await refreshHistory();
@@ -49,7 +61,8 @@ const ConverterForm: React.FC = () => {
   };
 
   const handleSwitchMode = () => {
-    reset({ value: '' });
+    // Clear any API errors
+    clearError();
     switchMode();
   };
 
@@ -58,6 +71,7 @@ const ConverterForm: React.FC = () => {
       {mode === 'toRoman' ? (
         <>
           <FormField
+            key="number-input"
             label="Enter a number (1-3999)"
             register={register}
             name="value"
@@ -73,6 +87,7 @@ const ConverterForm: React.FC = () => {
       ) : (
         <>
           <FormField
+            key="roman-input"
             label="Enter a Roman numeral"
             register={register}
             name="value"
