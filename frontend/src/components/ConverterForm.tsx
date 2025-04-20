@@ -1,126 +1,118 @@
-import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { ArrowLeftRight } from 'lucide-react';
-
-import FormField from './FormField';
-import ResultDisplay from './ResultDisplay';
-import Button from './ui/Button.tsx';
-import { useRomanConverter } from '../hooks/useRomanConverter.ts';
-import { useConversionHistory } from '../hooks/useConversionHistory.ts';
+import { useRomanConverter } from '../hooks/useRomanConverter';
+import { useConversionHistory } from '../hooks/useConversionHistory';
 import { useHistoryStore } from '../store/historyStore';
 
-interface ConversionFormData {
-  value: string;
-}
-
-const ConverterForm: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    clearErrors,
-    unregister,
-  } = useForm<ConversionFormData>({
-    defaultValues: {
-      value: '',
-    },
-  });
-
+export default function ConverterForm() {
   const {
     roman,
     number,
     error,
     mode,
     loading,
-    setRoman,
-    setNumber,
     convert,
     switchMode,
     getValidationRules,
     clearError,
   } = useRomanConverter();
 
-  const { refreshHistory } = useConversionHistory();
-  const showHistory = useHistoryStore(state => state.showHistory);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    mode: 'onChange',
+  });
 
-  // Reset form when mode changes
-  useEffect(() => {
-    unregister('value');
-    reset({ value: '' });
-    clearErrors();
-  }, [mode, reset, clearErrors, unregister]);
+  const onSubmit = async (data: any) => {
+    const value = mode === 'toRoman' ? data.number : data.roman;
+    const success = await convert(value);
 
-  const onSubmit = async (data: ConversionFormData) => {
-    clearError();
-
-    const success = await convert(data.value);
-    if (success && showHistory) {
-      await refreshHistory();
+    if (success) {
+      reset();
     }
   };
 
-  const handleSwitchMode = () => {
-    // Clear any API errors
-    clearError();
-    switchMode();
-  };
-
   return (
-    <>
-      {mode === 'toRoman' ? (
-        <>
-          <FormField
-            key="number-input"
-            label="Enter a number (1-3999)"
-            register={register}
-            name="value"
-            validation={getValidationRules()}
-            error={errors.value}
-            placeholder="Enter a number..."
-            type="number"
-            onChange={e => setNumber(e.target.value)}
-            value={number}
-          />
-          <ResultDisplay label="Roman Numeral" value={roman} />
-        </>
-      ) : (
-        <>
-          <FormField
-            key="roman-input"
-            label="Enter a Roman numeral"
-            register={register}
-            name="value"
-            validation={getValidationRules()}
-            error={errors.value}
-            placeholder="Enter a Roman numeral..."
-            onChange={e => setRoman(e.target.value.toUpperCase())}
-            value={roman}
-          />
-          <ResultDisplay label="Number" value={number} />
-        </>
-      )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-lg font-semibold text-gray-700">
+          {mode === 'toRoman' ? 'Number to Roman' : 'Roman to Number'}
+        </h2>
+        <button
+          type="button"
+          onClick={switchMode}
+          className="text-sm py-1 px-3 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+        >
+          Switch Mode
+        </button>
+      </div>
 
-      {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
-          {error}
+      {mode === 'toRoman' ? (
+        <div>
+          <label
+            htmlFor="number"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Enter a number (1-3999)
+          </label>
+          <input
+            id="number"
+            type="number"
+            {...register('number', getValidationRules())}
+            className="w-full p-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="42..."
+            onChange={clearError}
+          />
+          {errors.number && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.number.message as string}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <label
+            htmlFor="roman"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Enter a Roman numeral
+          </label>
+          <input
+            id="roman"
+            type="text"
+            {...register('roman', getValidationRules())}
+            className="w-full p-2 border rounded-md uppercase focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="XLII..."
+            onChange={clearError}
+          />
+          {errors.roman && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.roman.message as string}
+            </p>
+          )}
         </div>
       )}
 
-      <div className="flex gap-4">
-        <Button onClick={handleSubmit(onSubmit)} isLoading={loading} fullWidth>
-          Convert
-        </Button>
-        <Button
-          onClick={handleSwitchMode}
-          disabled={loading}
-          variant="icon"
-          icon={<ArrowLeftRight className="w-5 h-5" />}
-          aria-label="Switch conversion mode"
-        />
-      </div>
-    </>
-  );
-};
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
-export default ConverterForm;
+      <div className="flex justify-between items-center">
+        <div className="flex-1">
+          <p className="text-sm text-gray-500">Result:</p>
+          <p className="text-xl font-bold text-indigo-700 h-12">
+            {mode === 'toRoman' ? roman : number}
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+        >
+          Convert
+        </button>
+      </div>
+    </form>
+  );
+}

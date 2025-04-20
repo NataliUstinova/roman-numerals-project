@@ -1,45 +1,14 @@
 import { useState } from 'react';
-
-interface ConversionResponse {
-  convertedValue: string;
-  [key: string]: any;
-}
+import { useConvertToRoman, useConvertToNumber } from '../api/conversionApi';
 
 export function useRomanConverter() {
   const [roman, setRoman] = useState('');
   const [number, setNumber] = useState('');
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'toRoman' | 'toNumber'>('toRoman');
-  const [loading, setLoading] = useState(false);
 
-  const makeConversionRequest = async (
-    endpoint: string,
-    value: string,
-  ): Promise<ConversionResponse | null> => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/${endpoint}/${value}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(
-          errorData.error ||
-            `Failed to convert ${
-              endpoint === 'roman' ? 'number' : 'Roman numeral'
-            }`,
-        );
-        return null;
-      }
-
-      return await response.json();
-    } catch (err) {
-      console.error('Conversion error:', err);
-      setError(err instanceof Error ? err.message : 'Conversion failed');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const toRomanMutation = useConvertToRoman();
+  const toNumberMutation = useConvertToNumber();
 
   const convert = async (value: string): Promise<boolean> => {
     setError('');
@@ -51,21 +20,25 @@ export function useRomanConverter() {
         return false;
       }
 
-      const responseData = await makeConversionRequest('roman', num.toString());
-      if (responseData) {
-        setRoman(responseData.convertedValue);
+      try {
+        const result = await toRomanMutation.mutateAsync(num.toString());
+        setRoman(result.convertedValue);
         return true;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Conversion failed');
+        return false;
       }
     } else {
       const romanValue = value.toUpperCase();
-      const responseData = await makeConversionRequest('arabic', romanValue);
-      if (responseData) {
-        setNumber(responseData.convertedValue.toString());
+      try {
+        const result = await toNumberMutation.mutateAsync(romanValue);
+        setNumber(result.convertedValue.toString());
         return true;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Conversion failed');
+        return false;
       }
     }
-
-    return false;
   };
 
   const switchMode = () => {
@@ -102,7 +75,7 @@ export function useRomanConverter() {
     number,
     error,
     mode,
-    loading,
+    loading: toRomanMutation.isPending || toNumberMutation.isPending,
     setRoman,
     setNumber,
     convert,
