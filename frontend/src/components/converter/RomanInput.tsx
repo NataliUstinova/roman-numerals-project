@@ -6,14 +6,12 @@ interface RomanInputProps {
   register: UseFormRegister<any>;
   validationRules: any;
   error: any;
-  clearError: () => void;
 }
 
-const RomanInput: React.FC<RomanInputProps> = ({ 
-  register, 
-  validationRules, 
-  error, 
-  clearError 
+const RomanInput: React.FC<RomanInputProps> = ({
+  register,
+  validationRules,
+  error,
 }) => {
   return (
     <FormField
@@ -24,7 +22,6 @@ const RomanInput: React.FC<RomanInputProps> = ({
       register={register}
       validationRules={validationRules}
       error={error}
-      clearError={clearError}
       additionalClasses="uppercase"
     />
   );

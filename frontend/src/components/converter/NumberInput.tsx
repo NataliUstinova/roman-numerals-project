@@ -6,14 +6,12 @@ interface NumberInputProps {
   register: UseFormRegister<any>;
   validationRules: any;
   error: any;
-  clearError: () => void;
 }
 
-const NumberInput: React.FC<NumberInputProps> = ({ 
-  register, 
-  validationRules, 
-  error, 
-  clearError 
+const NumberInput: React.FC<NumberInputProps> = ({
+  register,
+  validationRules,
+  error,
 }) => {
   return (
     <FormField
@@ -24,7 +22,6 @@ const NumberInput: React.FC<NumberInputProps> = ({
       register={register}
       validationRules={validationRules}
       error={error}
-      clearError={clearError}
     />
   );
 };

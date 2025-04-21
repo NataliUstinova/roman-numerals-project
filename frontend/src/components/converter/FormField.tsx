@@ -9,7 +9,6 @@ interface FormFieldProps {
   register: UseFormRegister<any>;
   validationRules: any;
   error: any;
-  clearError: () => void;
   additionalClasses?: string;
 }
 
@@ -21,7 +20,6 @@ const FormField: React.FC<FormFieldProps> = ({
   register,
   validationRules,
   error,
-  clearError,
   additionalClasses = '',
 }) => {
   return (
@@ -38,12 +36,9 @@ const FormField: React.FC<FormFieldProps> = ({
         {...register(id, validationRules)}
         className={`w-full p-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 ${additionalClasses}`}
         placeholder={placeholder}
-        onChange={clearError}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600">
-          {error.message as string}
-        </p>
+        <p className="mt-1 text-sm text-red-600">{error.message as string}</p>
       )}
     </div>
   );
