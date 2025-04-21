@@ -1,5 +1,6 @@
 import React from 'react';
 import { ClipboardCopy, Check } from 'lucide-react';
+import InfoTooltip from '../ui/InfoTooltip.tsx';
 
 interface ResultDisplayProps {
   result: string | number | null;
@@ -7,10 +8,10 @@ interface ResultDisplayProps {
   setCopied: (value: boolean) => void;
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({ 
-  result, 
-  copied, 
-  setCopied 
+const ResultDisplay: React.FC<ResultDisplayProps> = ({
+  result,
+  copied,
+  setCopied,
 }) => {
   const handleCopy = () => {
     if (result) {
@@ -30,17 +31,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
         >
           {result}
           {result && (
-            <span
-              className={`absolute font-normal left-0 -top-4 text-xs px-2 py-1 rounded shadow-md whitespace-nowrap z-10 transition-colors ${
-                copied
-                  ? 'bg-green-600 text-white block'
-                  : 'bg-gray-300 text-gray-700 hidden group-hover:block'
-              }`}
-            >
-              {copied
-                ? 'Copied to clipboard!'
-                : 'Click to copy to clipboard'}
-            </span>
+            <InfoTooltip
+              show={copied}
+              message={
+                copied ? 'Copied to clipboard!' : 'Click to copy to clipboard'
+              }
+              className={
+                copied ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-700'
+              }
+            />
           )}
           {result &&
             (copied ? (
