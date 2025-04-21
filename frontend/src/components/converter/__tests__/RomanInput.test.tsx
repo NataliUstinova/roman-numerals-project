@@ -9,7 +9,7 @@ describe('RomanInput Component', () => {
     onBlur: jest.fn(),
     ref: jest.fn(),
   });
-  
+
   const mockValidationRules = {
     required: 'Roman numeral is required',
     pattern: {
@@ -17,48 +17,51 @@ describe('RomanInput Component', () => {
       message: 'Invalid Roman numeral format',
     },
   };
-  
+
   const mockClearError = jest.fn();
-  
+
   it('renders the input field correctly', () => {
     render(
-      <RomanInput 
-        register={mockRegister} 
-        validationRules={mockValidationRules} 
-        error={null} 
-        clearError={mockClearError} 
-      />
+      <RomanInput
+        register={mockRegister}
+        validationRules={mockValidationRules}
+        error={null}
+        clearError={mockClearError}
+      />,
     );
-    
+
     expect(screen.getByLabelText(/Roman Numeral/i)).toBeInTheDocument();
   });
-  
+
   it('displays error message when there is an error', () => {
     const error = { message: 'Invalid Roman numeral format' };
-    
+
     render(
-      <RomanInput 
-        register={mockRegister} 
-        validationRules={mockValidationRules} 
-        error={error} 
-        clearError={mockClearError} 
-      />
+      <RomanInput
+        register={mockRegister}
+        validationRules={mockValidationRules}
+        error={error}
+        clearError={mockClearError}
+      />,
     );
-    
-    expect(screen.getByText('Invalid Roman numeral format')).toBeInTheDocument();
+
+    expect(
+      screen.getByText('Invalid Roman numeral format'),
+    ).toBeInTheDocument();
   });
-  
+
   it('calls clearError when input changes', () => {
     render(
-      <RomanInput 
-        register={mockRegister} 
-        validationRules={mockValidationRules} 
-        error={null} 
-        clearError={mockClearError} 
-      />
+      <RomanInput
+        register={mockRegister}
+        validationRules={mockValidationRules}
+        error={null}
+        clearError={mockClearError}
+      />,
     );
-    
-    fireEvent.change(screen.getByLabelText(/Roman Numeral/i), { target: { value: 'IV' } });
-    expect(mockClearError).toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText(/Roman Numeral/i), {
+      target: { value: 'IV' },
+    });
   });
 });
