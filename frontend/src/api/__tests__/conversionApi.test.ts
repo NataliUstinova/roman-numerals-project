@@ -121,4 +121,49 @@ describe('conversionApi', () => {
       expect(queryClient.getQueryData(['conversions', 'list'])).toEqual([]);
     });
   });
+
+  it('should handle fetchAllConversions error', async () => {
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+    });
+
+    await expect(api.fetchAllConversions()).rejects.toThrow('Failed to fetch conversions');
+  });
+
+  it('should handle removeAllConversions error', async () => {
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+    });
+
+    await expect(api.removeAllConversions()).rejects.toThrow('Failed to remove conversions');
+  });
+
+  it('should handle convertToNumber error', async () => {
+    const mockError = { error: 'Invalid Roman numeral' };
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => mockError,
+    });
+
+    await expect(api.convertToNumber('INVALID')).rejects.toThrow('Invalid Roman numeral');
+  });
+
+  it('should handle convertToRoman error with custom message', async () => {
+    const mockError = { error: 'Invalid number' };
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => mockError,
+    });
+
+    await expect(api.convertToRoman('abc')).rejects.toThrow('Invalid number');
+  });
+
+  it('should handle convertToRoman error with default message', async () => {
+    (fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({}),
+    });
+
+    await expect(api.convertToRoman('abc')).rejects.toThrow('Failed to convert number to Roman numeral');
+  });
 });
