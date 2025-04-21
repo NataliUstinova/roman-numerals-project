@@ -66,8 +66,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Docker Compose
-        run: sudo apt-get install docker-compose-plugin
-
       - name: Deploy with Docker Compose
         run: docker-compose up -d
