@@ -11,7 +11,7 @@ jest.mock('../../hooks/useConversionHistory', () => ({
 // Mock the ConfirmDialog component
 jest.mock('../ui/ConfirmDialog.tsx', () => ({
   __esModule: true,
-  default: ({ isOpen, title, message, onConfirm, onCancel }) => (
+  default: ({ isOpen, title, message, onConfirm, onCancel }) =>
     isOpen ? (
       <div data-testid="confirm-dialog">
         <h2>{title}</h2>
@@ -19,11 +19,11 @@ jest.mock('../ui/ConfirmDialog.tsx', () => ({
         <button onClick={onConfirm}>Confirm</button>
         <button onClick={onCancel}>Cancel</button>
       </div>
-    ) : null
-  ),
+    ) : null,
 }));
 
-const mockUseConversionHistory = require('../../hooks/useConversionHistory').useConversionHistory;
+const mockUseConversionHistory =
+  require('../../hooks/useConversionHistory').useConversionHistory;
 
 const mockConversions = [
   {
@@ -56,11 +56,11 @@ describe('ConversionHistory Component', () => {
 
   it('renders correctly with history visible', () => {
     render(<ConversionHistory />);
-    
+
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.getByText('Clear All')).toBeInTheDocument();
     expect(screen.getByText('Hide')).toBeInTheDocument();
-    
+
     // Check for individual elements instead of combined text
     expect(screen.getByText('42')).toBeInTheDocument();
     expect(screen.getByText('XLII')).toBeInTheDocument();
@@ -144,5 +144,54 @@ describe('ConversionHistory Component', () => {
     render(<ConversionHistory />);
     fireEvent.click(screen.getByText('Clear All'));
     expect(screen.getByText('Confirm Deletion')).toBeInTheDocument();
+  });
+
+  it('shows confirm dialog when clear button is clicked and closes it on cancel', () => {
+    const handleClearHistory = jest.fn();
+    mockUseConversionHistory.mockReturnValue({
+      conversions: mockConversions,
+      isLoading: false,
+      error: null,
+      showHistory: true,
+      toggleHistory: jest.fn(),
+      handleClearHistory,
+    });
+
+    render(<ConversionHistory />);
+
+    // Test for line 24-25: handleClearClick
+    fireEvent.click(screen.getByText('Clear All'));
+    expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
+
+    // Test for line 29: cancelClear
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
+  });
+
+  it('calls handleClearHistory when confirming clear action', () => {
+    const handleClearHistory = jest.fn();
+    mockUseConversionHistory.mockReturnValue({
+      conversions: mockConversions,
+      isLoading: false,
+      error: null,
+      showHistory: true,
+      toggleHistory: jest.fn(),
+      handleClearHistory,
+    });
+
+    render(<ConversionHistory />);
+
+    // Open dialog
+    fireEvent.click(screen.getByText('Clear All'));
+    expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
+
+    // Confirm deletion (testing line 25 functionality)
+    fireEvent.click(screen.getByText('Confirm'));
+
+    // Check if handleClearHistory was called
+    expect(handleClearHistory).toHaveBeenCalledTimes(1);
+
+    // Check if dialog was closed
+    expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
   });
 });
