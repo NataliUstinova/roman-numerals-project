@@ -17,7 +17,7 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: ALLOWED_ORIGINS
-        value: https://roman-numerals-project.onrender.com
+        value: https://roman-numerals-frontend.onrender.com
     plan: free
 
   - name: roman-numerals-frontend
@@ -27,13 +27,10 @@ services:
     startCommand: serve -s build
     envVars:
       - key: REACT_APP_API_URL
-        value: https://roman-numerals-project.onrender.com
-    customDomains:
-      - name: roman-numerals-project.onrender.com
+        value: https://roman-numerals-backend.onrender.com
     plan: free
 
 databases:
   - name: roman-numerals-mongodb
-    type: mongodb
     plan: free
     databaseName: roman-numerals-db
