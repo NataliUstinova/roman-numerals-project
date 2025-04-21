@@ -62,7 +62,7 @@ export const api = {
 };
 
 // React Query hooks
-export const useConversions = showHistory => {
+export const useConversions = (showHistory: boolean) => {
   return useQuery({
     queryKey: queryKeys.conversions.list(),
     queryFn: api.fetchAllConversions,
