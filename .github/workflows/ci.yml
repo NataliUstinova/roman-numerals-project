@@ -22,7 +22,9 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd ${{ matrix.project }}
+          npm install
         working-directory: ./${{ matrix.project }}
       
       - name: Run tests
