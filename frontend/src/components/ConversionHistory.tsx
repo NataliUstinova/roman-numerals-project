@@ -44,7 +44,7 @@ export default function ConversionHistory() {
   }
 
   return (
-    <div className="mt-6 border rounded-lg p-4 bg-gray-50">
+    <section className="mt-6 border rounded-lg p-4 bg-gray-50">
       <div className="flex justify-between items-center mb-4">
         <H2>History</H2>
         <div className="space-x-2">
@@ -117,6 +117,6 @@ export default function ConversionHistory() {
           No conversion history yet
         </div>
       )}
-    </div>
+    </section>
   );
 }
