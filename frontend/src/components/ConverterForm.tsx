@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useRomanConverter } from '../hooks/useRomanConverter';
 import Button from './ui/Button.tsx';
+import { ArrowRightLeft, Calculator } from 'lucide-react';
 
 export default function ConverterForm() {
   const {
@@ -44,6 +45,8 @@ export default function ConverterForm() {
           size="sm"
           type="button"
           onClick={switchMode}
+          icon={ArrowRightLeft}
+          iconPosition={'left'}
         >
           Switch Mode
         </Button>
@@ -105,7 +108,14 @@ export default function ConverterForm() {
           </p>
         </div>
 
-        <Button variant="primary" type="submit" disabled={loading}>
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={loading}
+          iconPosition={'left'}
+          icon={Calculator}
+          className={'flex-1'}
+        >
           Convert
         </Button>
       </div>

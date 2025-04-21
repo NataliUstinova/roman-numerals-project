@@ -1,5 +1,6 @@
 import { useConversionHistory } from '../hooks/useConversionHistory';
 import Button from './ui/Button.tsx';
+import { Trash2, EyeOff, History } from 'lucide-react';
 
 export default function ConversionHistory() {
   const {
@@ -13,7 +14,13 @@ export default function ConversionHistory() {
 
   if (!showHistory) {
     return (
-      <Button variant="secondary" fullWidth onClick={toggleHistory}>
+      <Button
+        variant="secondary"
+        fullWidth
+        onClick={toggleHistory}
+        icon={History}
+        iconPosition={'left'}
+      >
         Show History
       </Button>
     );
@@ -22,19 +29,25 @@ export default function ConversionHistory() {
   return (
     <div className="mt-6 border rounded-lg p-4 bg-gray-50">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-700">
-          Conversion History
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-700">History</h2>
         <div className="space-x-2">
           <Button
             variant="danger"
             size="sm"
             onClick={handleClearHistory}
             disabled={isLoading}
+            icon={Trash2}
+            iconPosition={'left'}
           >
             Clear All
           </Button>
-          <Button variant="outline" size="sm" onClick={toggleHistory}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleHistory}
+            icon={EyeOff}
+            iconPosition={'left'}
+          >
             Hide
           </Button>
         </div>
