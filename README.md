@@ -1,7 +1,7 @@
 # Roman Numerals Converter
 
-A full-stack application that converts between Roman numerals and Arabic numbers, with caching capabilities to improve performance.
-
+A full-stack application that converts between Roman numerals and Arabic numbers, with caching capabilities.
+![img.png](frontend/public/img.png)
 ## Features
 
 - Convert Arabic numbers to Roman numerals
@@ -12,7 +12,7 @@ A full-stack application that converts between Roman numerals and Arabic numbers
 
 ## Tech Stack
 
-- **Frontend**: React.js
+- **Frontend**: React.js, Tailwind CSS
 - **Backend**: Node.js with Express
 - **Database**: MongoDB
 - **Testing**: Jest with Supertest
@@ -23,6 +23,48 @@ A full-stack application that converts between Roman numerals and Arabic numbers
 - `GET /arabic/:inputValue` - Convert Roman numeral to Arabic number
 - `GET /all` - Get all previous conversions
 - `DELETE /remove` - Clear all conversion history
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant ExpressApp
+    participant Controller
+    participant ConversionService
+    participant DBService
+    participant MongoDB
+
+    Client->>ExpressApp: GET /roman/:inputValue
+    ExpressApp->>Controller: convertToRoman(req, res)
+    Controller->>ConversionService: isValidNumber(inputValue)
+    alt Invalid input
+        Controller-->>ExpressApp: 400 Bad Request
+    else Valid input
+        Controller->>DBService: getCachedConversion(inputValue, "arabic-to-roman")
+        alt Cache hit
+            Controller-->>ExpressApp: 200 OK (cached result)
+        else Cache miss
+            Controller->>ConversionService: arabicToRoman(inputValue)
+            Controller->>DBService: saveConversion(inputValue, roman, "arabic-to-roman")
+            Controller-->>ExpressApp: 200 OK (new result)
+        end
+    end
+```
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant ExpressApp
+    participant Controller
+    participant DBService
+    participant MongoDB
+
+    Client->>ExpressApp: GET /all
+    ExpressApp->>Controller: getAll(req, res)
+    Controller->>DBService: getAllConversions()
+    DBService->>MongoDB: Query all conversions
+    DBService-->>Controller: Conversion records
+    Controller-->>ExpressApp: 200 OK (conversion list)
+```
 
 ## Installation
 
@@ -88,7 +130,7 @@ A full-stack application that converts between Roman numerals and Arabic numbers
    npm start
    ```
 
-4. The application should now be running at http://localhost:3000
+4. The application should now be running at http://localhost:5173
 
 ### Testing
 
@@ -98,4 +140,61 @@ Run the backend tests with:
 ```bash
 cd backend
 npm test
+```
+
+## Running with Docker
+
+Build and start the containers:
+```bash
+docker-compose up --build
+```
+
+To run in detached mode:
+```bash
+docker-compose up -d
+```
+
+To stop the containers:
+```bash
+docker-compose down
+```
+
+## Accessing the Application
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8080
+- MongoDB: mongodb://localhost:27017
+
+## Development with Docker
+
+For development with hot-reloading:
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+## Environment Variables
+
+Create a .env file in the project root with the following variables:
+```bash
+MONGODB_URI=mongodb://mongo:27017/roman-numerals-db
+NODE_ENV=development
+LOG_LEVEL=info
+ALLOWED_ORIGINS=http://localhost:5173
+```
+
+## Useful Docker Commands
+
+View logs:
+```bash
+docker-compose logs -f
+```
+
+Rebuild specific service:
+```bash
+docker-compose up --build <service_name>
+```
+
+Access MongoDB shell:
+```bash
+docker exec -it roman-numerals-mongo mongo
 ```

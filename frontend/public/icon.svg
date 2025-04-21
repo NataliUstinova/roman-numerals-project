@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <g fill="#6366f1" font-family="Arial, sans-serif" font-weight="bold">
+    <text x="180" y="400" font-size="450" text-anchor="middle">V</text>
+
+    <path d="M280,256 L420,256" stroke="#6366f1" stroke-width="32" stroke-linecap="round"/>
+    <path d="M380,216 L420,256 L380,296" stroke="#6366f1" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
