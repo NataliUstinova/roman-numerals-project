@@ -48,7 +48,10 @@ export default function ConverterForm() {
           variant="secondary"
           size="sm"
           type="button"
-          onClick={switchMode}
+          onClick={() => {
+            switchMode();
+            reset();
+          }}
           icon={ArrowRightLeft}
           iconPosition={'left'}
         >
