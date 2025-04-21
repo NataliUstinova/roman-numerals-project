@@ -2,8 +2,11 @@ import { useConversionHistory } from '../hooks/useConversionHistory';
 import Button from './ui/Button.tsx';
 import { Trash2, EyeOff, History } from 'lucide-react';
 import H2 from './ui/H2.tsx';
+import { useState } from 'react';
+import ConfirmDialog from './ui/ConfirmDialog.tsx';
 
 export default function ConversionHistory() {
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     conversions,
     isLoading,
@@ -12,6 +15,19 @@ export default function ConversionHistory() {
     toggleHistory,
     handleClearHistory,
   } = useConversionHistory();
+
+  const handleClearClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const confirmClear = () => {
+    handleClearHistory();
+    setShowConfirmDialog(false);
+  };
+
+  const cancelClear = () => {
+    setShowConfirmDialog(false);
+  };
 
   if (!showHistory) {
     return (
@@ -35,7 +51,7 @@ export default function ConversionHistory() {
           <Button
             variant="danger"
             size="sm"
-            onClick={handleClearHistory}
+            onClick={handleClearClick}
             disabled={isLoading}
             icon={Trash2}
             iconPosition={'left'}
@@ -53,6 +69,14 @@ export default function ConversionHistory() {
           </Button>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="Confirm Deletion"
+        message="Are you sure you want to clear all conversion history?"
+        onConfirm={confirmClear}
+        onCancel={cancelClear}
+      />
 
       {isLoading ? (
         <div className="text-center py-4">Loading...</div>
