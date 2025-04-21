@@ -1,0 +1,39 @@
+services:
+  - name: roman-numerals-backend
+    type: web
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: MONGODB_URI
+        fromService:
+          name: roman-numerals-mongodb
+          type: mongodb
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: ALLOWED_ORIGINS
+        value: https://roman-numerals-project.onrender.com
+    plan: free
+
+  - name: roman-numerals-frontend
+    type: web
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: serve -s build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://roman-numerals-project.onrender.com
+    customDomains:
+      - name: roman-numerals-project.onrender.com
+    plan: free
+
+databases:
+  - name: roman-numerals-mongodb
+    type: mongodb
+    plan: free
+    databaseName: roman-numerals-db
