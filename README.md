@@ -1,6 +1,6 @@
 # Roman Numerals Converter
 
-A full-stack application that converts between Roman numerals and Arabic numbers, with caching capabilities to improve performance.
+A full-stack application that converts between Roman numerals and Arabic numbers, with caching capabilities.
 ![img.png](frontend/public/img.png)
 ## Features
 
