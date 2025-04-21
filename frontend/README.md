@@ -20,13 +20,18 @@ This is the frontend for the Roman Numerals Converter project. It provides a use
 
 ```
 frontend/
-├── public/          # Static files
-├── src/             # Application source code
-│   ├── components/  # React components
-│   ├── styles/      # CSS files
-│   ├── utils/       # Utility functions
-│   ├── App.js       # Main application component
-│   └── index.js     # Application entry point
-├── package.json     # Project dependencies
-└── README.md        # This file
+├── public/              # Static files
+├── src/                 # Application source code
+│   ├── components/      # React components
+│   │   ├── ui/         # UI components
+│   │   └── __tests__/  # Component tests
+│   ├── utils/           # Utility functions
+│   ├── App.tsx          # Main application component
+│   └── main.tsx         # Application entry point
+├── package.json         # Project dependencies
+├── tsconfig.json        # TypeScript configuration
+├── tailwind.config.js   # Tailwind CSS configuration
+├── postcss.config.js    # PostCSS configuration
+├── vite.config.ts       # Vite configuration
+└── README.md            # This file
 ```
