@@ -1,6 +1,7 @@
 import { useConversionHistory } from '../hooks/useConversionHistory';
 import Button from './ui/Button.tsx';
 import { Trash2, EyeOff, History } from 'lucide-react';
+import H2 from './ui/H2.tsx';
 
 export default function ConversionHistory() {
   const {
@@ -29,7 +30,7 @@ export default function ConversionHistory() {
   return (
     <div className="mt-6 border rounded-lg p-4 bg-gray-50">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-700">History</h2>
+        <H2>History</H2>
         <div className="space-x-2">
           <Button
             variant="danger"
