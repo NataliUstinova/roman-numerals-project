@@ -43,7 +43,7 @@ export default function ConversionHistory() {
             Clear All
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={toggleHistory}
             icon={EyeOff}
