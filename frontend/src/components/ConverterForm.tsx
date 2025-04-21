@@ -1,9 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { useRomanConverter } from '../hooks/useRomanConverter';
 import Button from './ui/Button.tsx';
-import { ArrowRightLeft, Calculator } from 'lucide-react';
+import { ArrowRightLeft, Calculator, ClipboardCopy, Check } from 'lucide-react';
+import { useState } from 'react';
 
 export default function ConverterForm() {
+  const [copied, setCopied] = useState(false);
   const {
     roman,
     number,
@@ -33,6 +35,8 @@ export default function ConverterForm() {
       reset();
     }
   };
+
+  const result = mode === 'toRoman' ? roman : number;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -97,22 +101,50 @@ export default function ConverterForm() {
           )}
         </div>
       )}
-
       {error && <p className="text-sm text-red-600">{error}</p>}
-
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <p className="text-sm text-gray-500">Result:</p>
-          <p className="text-xl font-bold text-indigo-700 h-12">
-            {mode === 'toRoman' ? roman : number}
-          </p>
+          <div className="relative">
+            <p
+              className="text-xl font-bold text-indigo-700 h-12 cursor-pointer p-1 pb-3 rounded flex items-center gap-2 relative group"
+              onClick={() => {
+                if (result) {
+                  navigator.clipboard.writeText(result.toString());
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }
+              }}
+            >
+              {result}
+              {result && (
+                <span
+                  className={`absolute font-normal left-0 -top-4 text-xs px-2 py-1 rounded shadow-md whitespace-nowrap z-10 transition-colors ${
+                    copied
+                      ? 'bg-green-600 text-white block'
+                      : 'bg-gray-300 text-gray-700 hidden group-hover:block'
+                  }`}
+                >
+                  {copied
+                    ? 'Copied to clipboard!'
+                    : 'Click to copy to clipboard'}
+                </span>
+              )}
+              {result &&
+                (copied ? (
+                  <Check size={16} className="text-green-500" />
+                ) : (
+                  <ClipboardCopy size={16} className="text-gray-400" />
+                ))}
+            </p>
+          </div>
         </div>
 
         <Button
           variant="primary"
           type="submit"
           disabled={loading}
-          iconPosition={'left'}
+          iconPosition={'right'}
           icon={Calculator}
           className={'flex-1'}
         >
