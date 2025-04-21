@@ -1,14 +1,4 @@
 import { useConversionHistory } from '../hooks/useConversionHistory';
-
-export interface Conversion {
-  _id: string;
-  inputValue: string;
-  convertedValue: string;
-  type: string;
-  createdAt: string;
-  __v: number;
-}
-
 export default function ConversionHistory() {
   const {
     conversions,
@@ -16,10 +6,9 @@ export default function ConversionHistory() {
     error,
     showHistory,
     toggleHistory,
-    handleClearHistory
+    handleClearHistory,
   } = useConversionHistory();
-  
-  
+
   if (!showHistory) {
     return (
       <button
@@ -34,7 +23,9 @@ export default function ConversionHistory() {
   return (
     <div className="mt-6 border rounded-lg p-4 bg-gray-50">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-700">Conversion History</h2>
+        <h2 className="text-lg font-semibold text-gray-700">
+          Conversion History
+        </h2>
         <div className="space-x-2">
           <button
             onClick={handleClearHistory}
@@ -60,11 +51,17 @@ export default function ConversionHistory() {
         </div>
       ) : conversions && conversions.length > 0 ? (
         <ul className="space-y-2 max-h-60 overflow-y-auto">
-          {conversions.map((conversion) => (
-            <li key={conversion._id} className="text-sm p-2 bg-white rounded border">
+          {conversions.map(conversion => (
+            <li
+              key={conversion._id}
+              className="text-sm p-2 bg-white rounded border"
+            >
               <div className="flex justify-between">
                 <span className="font-medium">
-                  {conversion.type === 'arabic-to-roman' ? 'Number → Roman' : 'Roman → Number'}:
+                  {conversion.type === 'arabic-to-roman'
+                    ? 'Number → Roman'
+                    : 'Roman → Number'}
+                  :
                 </span>
                 <span className="text-gray-500 text-xs">
                   {new Date(conversion.createdAt).toLocaleString()}
@@ -73,13 +70,17 @@ export default function ConversionHistory() {
               <div className="mt-1">
                 <span className="text-gray-600">{conversion.inputValue}</span>
                 <span className="mx-2">→</span>
-                <span className="font-semibold">{conversion.convertedValue}</span>
+                <span className="font-semibold">
+                  {conversion.convertedValue}
+                </span>
               </div>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="text-center py-4 text-gray-500">No conversion history yet</div>
+        <div className="text-center py-4 text-gray-500">
+          No conversion history yet
+        </div>
       )}
     </div>
   );

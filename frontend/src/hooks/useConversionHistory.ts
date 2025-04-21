@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, useRemoveAllConversions } from '../api/conversionApi';
+import { useQueryClient } from '@tanstack/react-query';
+import { useConversions, useRemoveAllConversions } from '../api/conversionApi';
 import { useHistoryStore } from '../store/historyStore';
 import { queryKeys } from '../api/queryKeys';
 
@@ -8,17 +8,7 @@ export function useConversionHistory() {
   const queryClient = useQueryClient();
 
   // Only fetch when history is visible
-  const {
-    data: conversions,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: queryKeys.conversions.list(),
-    queryFn: api.fetchAllConversions,
-    enabled: showHistory,
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-  });
+  const { data: conversions, isLoading, error } = useConversions(showHistory);
 
   const removeAllMutation = useRemoveAllConversions();
 

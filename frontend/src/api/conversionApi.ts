@@ -1,14 +1,18 @@
 import { queryKeys } from './queryKeys';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-interface ConversionResponse {
+export interface Conversion {
+  _id: string;
+  inputValue: string;
   convertedValue: string;
-  [key: string]: any;
+  type: string;
+  createdAt: string;
+  __v: number;
 }
 
 // Base API functions
 export const api = {
-  convertToRoman: async (number: string): Promise<ConversionResponse> => {
+  convertToRoman: async (number: string): Promise<Conversion> => {
     const response = await fetch(`/roman/${number}`);
 
     if (!response.ok) {
@@ -21,7 +25,7 @@ export const api = {
     return await response.json();
   },
 
-  convertToNumber: async (roman: string): Promise<ConversionResponse> => {
+  convertToNumber: async (roman: string): Promise<Conversion> => {
     const response = await fetch(`/arabic/${roman}`);
 
     if (!response.ok) {
@@ -58,10 +62,13 @@ export const api = {
 };
 
 // React Query hooks
-export const useConversions = () => {
+export const useConversions = showHistory => {
   return useQuery({
     queryKey: queryKeys.conversions.list(),
     queryFn: api.fetchAllConversions,
+    enabled: showHistory,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 };
 
