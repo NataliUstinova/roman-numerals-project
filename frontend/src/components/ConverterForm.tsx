@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useRomanConverter } from '../hooks/useRomanConverter';
-import { useConversionHistory } from '../hooks/useConversionHistory';
-import { useHistoryStore } from '../store/historyStore';
+import Button from './ui/Button.tsx';
 
 export default function ConverterForm() {
   const {
@@ -40,13 +39,14 @@ export default function ConverterForm() {
         <h2 className="text-lg font-semibold text-gray-700">
           {mode === 'toRoman' ? 'Number to Roman' : 'Roman to Number'}
         </h2>
-        <button
+        <Button
+          variant="secondary"
+          size="sm"
           type="button"
           onClick={switchMode}
-          className="text-sm py-1 px-3 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
         >
           Switch Mode
-        </button>
+        </Button>
       </div>
 
       {mode === 'toRoman' ? (
@@ -105,13 +105,9 @@ export default function ConverterForm() {
           </p>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
+        <Button variant="primary" type="submit" disabled={loading}>
           Convert
-        </button>
+        </Button>
       </div>
     </form>
   );

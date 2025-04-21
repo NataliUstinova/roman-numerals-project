@@ -1,4 +1,6 @@
 import { useConversionHistory } from '../hooks/useConversionHistory';
+import Button from './ui/Button.tsx';
+
 export default function ConversionHistory() {
   const {
     conversions,
@@ -11,12 +13,9 @@ export default function ConversionHistory() {
 
   if (!showHistory) {
     return (
-      <button
-        onClick={toggleHistory}
-        className="w-full py-2 px-4 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors"
-      >
+      <Button variant="secondary" fullWidth onClick={toggleHistory}>
         Show History
-      </button>
+      </Button>
     );
   }
 
@@ -27,19 +26,17 @@ export default function ConversionHistory() {
           Conversion History
         </h2>
         <div className="space-x-2">
-          <button
+          <Button
+            variant="danger"
+            size="sm"
             onClick={handleClearHistory}
             disabled={isLoading}
-            className="text-sm py-1 px-3 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors disabled:opacity-50"
           >
             Clear All
-          </button>
-          <button
-            onClick={toggleHistory}
-            className="text-sm py-1 px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
-          >
+          </Button>
+          <Button variant="outline" size="sm" onClick={toggleHistory}>
             Hide
-          </button>
+          </Button>
         </div>
       </div>
 

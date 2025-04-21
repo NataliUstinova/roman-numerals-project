@@ -8,8 +8,8 @@ const HowItWorks: React.FC = () => (
       <li>Switch modes to convert Roman numerals back to numbers</li>
       <li>Click the convert button to see the result</li>
       <li>
-        View your conversion history or clear it using the buttons 'View
-        History' and 'Clear History'
+        View your conversion history or clear it using the buttons 'Show
+        History', 'Hide' and 'Clear'
       </li>
     </ul>
   </div>
